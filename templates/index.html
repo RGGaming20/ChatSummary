@@ -2,20 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Stream Chat Summary</title>
+    <title>Live Leaderboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700;1,900&family=Orbitron:wght@500;600;700;800;900&display=swap');
+
+        * { box-sizing: border-box; }
+
+        html, body { margin: 0; padding: 0; }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #050505;
-            color: white;
-            font-family: 'Rajdhani', sans-serif;
+            background: #08080b;
+            color: #f2f2f0;
+            font-family: 'Titillium Web', sans-serif;
             overflow: hidden;
             width: 1920px;
             height: 1080px;
+            position: relative;
+            background-image:
+                repeating-linear-gradient(115deg, rgba(255,255,255,0.014) 0px, rgba(255,255,255,0.014) 1px, transparent 1px, transparent 64px),
+                radial-gradient(ellipse 1300px 750px at 50% -12%, rgba(225,6,0,0.07), transparent 60%),
+                radial-gradient(ellipse 900px 600px at 100% 100%, rgba(217,164,65,0.045), transparent 60%);
+        }
+
+        /* Top racing stripe (signature accent) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            z-index: 500;
+            background: linear-gradient(90deg,
+                #E10600 0%, #E10600 22%,
+                #D9A441 32%, #D9A441 38%,
+                #E10600 48%, #E10600 62%,
+                #D9A441 72%, #D9A441 78%,
+                #E10600 88%, #E10600 100%);
+            opacity: 0.9;
         }
 
         /* --- Header (8% Height) --- */
@@ -24,70 +49,118 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 0 30px;
+            background: linear-gradient(180deg, rgba(19,19,24,0.92) 0%, rgba(9,9,12,0.8) 100%);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+            padding: 0 32px;
             box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+            animation: fade-down 0.6s cubic-bezier(0.16,1,0.3,1) both;
         }
-        
+
+        @keyframes fade-down {
+            from { opacity: 0; transform: translateY(-14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
         .header-left {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-        
+
         #digital-clock {
-            font-size: 1.8rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35rem;
             font-weight: 700;
-            color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
-            letter-spacing: 1px;
-            min-width: 120px;
+            color: #f2f2f0;
+            letter-spacing: 2px;
+            min-width: 118px;
+            text-align: center;
+            padding: 7px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
         }
-        
+
         .header-center {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 18px;
             flex: 1;
             justify-content: center;
         }
-        
+
         .header-right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 5px;
+            gap: 6px;
         }
-        
+
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
+            font-weight: 900;
+            font-style: italic;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            letter-spacing: 1px;
             margin: 0;
+            color: #f7f7f5;
+            padding-left: 16px;
+            border-left: 4px solid #E10600;
+            line-height: 1.1;
         }
-        
+
         #stream-title {
-            font-size: 1.2rem;
-            color: #aaa;
+            font-size: 1.05rem;
+            font-weight: 400;
+            font-style: normal;
+            color: #8d8d96;
             max-width: 500px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         #status-indicator {
-            font-size: 1rem;
-            color: #ff3333;
-        }
-        
-        #stream-uptime {
-            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
             font-weight: 700;
-            color: #ff9500;
-            text-shadow: 0 0 10px rgba(255, 149, 0, 0.6);
+            letter-spacing: 1.5px;
+            padding: 4px 14px 4px 26px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
+        }
+
+        #status-indicator::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 8px currentColor;
+            animation: dot-pulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+            50%      { opacity: 0.45; transform: translateY(-50%) scale(0.78); }
+        }
+
+        #stream-uptime {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #D9A441;
+            text-shadow: 0 0 12px rgba(217, 164, 65, 0.45);
             letter-spacing: 1px;
         }
 
@@ -97,26 +170,28 @@
             flex-wrap: wrap;
             height: 92vh;
             width: 100%;
+            position: relative;
+            z-index: 5;
         }
 
-        /* --- Bar Chart Section (Top 60% of remaining) --- */
+        /* --- Bar Chart Section --- */
         .bar-section {
             width: 100%;
             height: 60%;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 60px;
+            padding-bottom: 68px;
             padding-left: 120px;
             padding-right: 0px;
             box-sizing: border-box;
-            background: radial-gradient(circle at center, rgba(30,30,30,0.5) 0%, rgba(0,0,0,0) 70%);
-            gap: 15px;
+            background: radial-gradient(ellipse at center, rgba(40,40,45,0.35) 0%, rgba(0,0,0,0) 70%);
+            gap: 16px;
             position: relative;
         }
 
         .bar-container {
-            width: 130px; 
+            width: 130px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -127,80 +202,118 @@
 
         .bar {
             width: 100%;
-            transition: height 0.5s ease-in-out, background-color 0.5s, box-shadow 0.5s;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            
-            /* Glass Finish */
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-bottom: none;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            
+            transition: height 0.6s cubic-bezier(0.16,1,0.3,1), background-color 0.5s, box-shadow 0.5s;
+            border-top: 1px solid rgba(255,255,255,0.35);
+
+            background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.08) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255,255,255,0.12);
+            border-right: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 0 18px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.25);
+
             display: flex;
             align-items: flex-end;
             justify-content: center;
             position: relative;
         }
-        
+
         .bar-label {
             position: absolute;
-            bottom: 10px;
+            bottom: 12px;
             text-align: center;
             width: 100%;
             font-weight: 700;
-            font-size: 1.5rem;
-            text-shadow: 0 0 5px black;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 6px black;
             z-index: 10;
         }
 
         .bar-count {
             position: absolute;
-            bottom: calc(100% + 5px);
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            bottom: calc(100% + 8px);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #f7f7f5;
+            text-shadow: 0 0 12px rgba(255,255,255,0.5);
         }
 
         .bar-rank {
             position: absolute;
-            bottom: -45px;
-            font-size: 1.2rem;
-            color: #aaa;
+            bottom: -42px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ccc;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 4px 12px 4px 18px;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+            transition: background 0.4s, color 0.4s, border-color 0.4s;
         }
 
-        /* --- Bottom Left: Graph (75% width, 40% height) --- */
+        .bar-rank:empty { display: none; }
+
+        .bar-rank.gold {
+            background: linear-gradient(90deg, #D9A441, #F4C542);
+            color: #1a1305;
+            border-color: transparent;
+            box-shadow: 0 0 14px rgba(244, 197, 66, 0.45);
+        }
+
+        .bar-rank.silver {
+            background: linear-gradient(90deg, #9a9ca1, #d4d6da);
+            color: #16171a;
+            border-color: transparent;
+            box-shadow: 0 0 12px rgba(198, 201, 206, 0.35);
+        }
+
+        .bar-rank.bronze {
+            background: linear-gradient(90deg, #a3652c, #cd7f32);
+            color: #1a0f04;
+            border-color: transparent;
+            box-shadow: 0 0 12px rgba(205, 127, 50, 0.35);
+        }
+
+        /* --- Bottom Left: Graph --- */
         .graph-section {
             width: 75%;
             height: 40%;
-            padding: 20px;
+            padding: 22px 26px;
             box-sizing: border-box;
-            border-right: 1px solid rgba(255,255,255,0.1);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
             position: relative;
         }
 
-        /* --- Bottom Right: Chat (25% width, 40% height) --- */
+        /* --- Bottom Right: Chat --- */
         .chat-section {
             width: 25%;
             height: 40%;
-            background: rgba(0,0,0,0.3);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(10,10,13,0.55);
+            border-top: 1px solid rgba(255,255,255,0.08);
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 14px 16px;
             box-sizing: border-box;
         }
 
         .chat-title {
-            font-size: 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             margin-bottom: 10px;
-            color: #888;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
+            padding-bottom: 8px;
+            padding-left: 10px;
+            color: #d9d9dc;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid #E10600;
         }
 
         #chat-box {
@@ -209,35 +322,55 @@
             flex-direction: column;
             justify-content: flex-end;
             flex: 1;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             text-shadow: 0 0 2px black;
         }
-        
+
         .chat-msg {
-            margin-bottom: 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 2px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.045);
+            padding: 2px 0 4px 8px;
+            border-left: 2px solid rgba(255,255,255,0.1);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .chat-msg b {
-            color: #ccc;
-            margin-right: 5px;
+            color: #D9A441;
+            margin-right: 6px;
+            font-weight: 700;
         }
 
-        /* --- Chat Rate Display at bottom of chat section --- */
+        .chat-msg:last-child {
+            animation: msg-in 0.4s cubic-bezier(0.16,1,0.3,1) both;
+            border-left-color: #E10600;
+        }
+
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateX(-6px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- Chat Rate Display --- */
         .chat-rate-display {
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #00ffcc;
-            text-shadow: 0 0 10px #00ffcc;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #8d8d96;
+        }
+
+        #current-rate-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: #E10600;
+            text-shadow: 0 0 10px rgba(225,6,0,0.55);
         }
 
         /* --- Admin Controls Overlay --- */
@@ -245,9 +378,9 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -261,25 +394,26 @@
         }
 
         .admin-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+            background: rgba(225, 6, 0, 0.18);
+            border-color: rgba(225, 6, 0, 0.5);
+            box-shadow: 0 0 20px rgba(225, 6, 0, 0.35);
         }
 
         .admin-panel {
             position: fixed;
             bottom: 80px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(9, 9, 12, 0.94);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 204, 0.3);
-            border-radius: 10px;
+            border: 1px solid rgba(225, 6, 0, 0.3);
+            border-radius: 6px;
             padding: 20px;
             width: 400px;
             max-height: 600px;
             overflow-y: auto;
             display: none;
             z-index: 999;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
         }
 
         .admin-panel.active {
@@ -288,8 +422,10 @@
 
         .admin-panel h3 {
             margin-top: 0;
-            color: #00ffcc;
-            border-bottom: 2px solid #00ffcc;
+            color: #f2f2f0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #E10600;
             padding-bottom: 10px;
         }
 
@@ -306,68 +442,70 @@
 
         .team-input label {
             min-width: 120px;
-            color: #aaa;
+            color: #8d8d96;
         }
 
         .team-input input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
             padding: 5px 10px;
             color: white;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Titillium Web', sans-serif;
         }
 
         .admin-button {
-            background: rgba(0, 255, 204, 0.2);
-            border: 1px solid #00ffcc;
-            color: #00ffcc;
+            background: rgba(225, 6, 0, 0.15);
+            border: 1px solid #E10600;
+            color: #ff6b63;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Titillium Web', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.95rem;
             margin-top: 10px;
             margin-right: 10px;
             transition: all 0.3s;
         }
 
         .admin-button:hover {
-            background: rgba(0, 255, 204, 0.4);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+            background: rgba(225, 6, 0, 0.35);
+            box-shadow: 0 0 15px rgba(225, 6, 0, 0.4);
         }
 
         .admin-button.danger {
-            background: rgba(255, 51, 51, 0.2);
+            background: rgba(255, 51, 51, 0.15);
             border-color: #ff3333;
-            color: #ff3333;
+            color: #ff8f8f;
         }
 
         .admin-button.danger:hover {
-            background: rgba(255, 51, 51, 0.4);
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+            background: rgba(255, 51, 51, 0.35);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
         }
 
         .status-message {
             margin-top: 10px;
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 4px;
             display: none;
         }
 
         .status-message.success {
-            background: rgba(0, 255, 0, 0.2);
-            border: 1px solid #00ff00;
-            color: #00ff00;
+            background: rgba(0, 200, 100, 0.15);
+            border: 1px solid #00c864;
+            color: #6dffbb;
             display: block;
         }
 
         .status-message.error {
-            background: rgba(255, 0, 0, 0.2);
+            background: rgba(255, 0, 0, 0.15);
             border: 1px solid #ff0000;
-            color: #ff0000;
+            color: #ff8f8f;
             display: block;
         }
 
@@ -377,13 +515,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #ff9500;
-            border-radius: 10px;
-            padding: 30px;
+            background: rgba(8, 8, 11, 0.96);
+            border: 1px solid rgba(255, 149, 0, 0.5);
+            border-radius: 6px;
+            padding: 30px 40px;
             display: none;
             z-index: 2000;
             text-align: center;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
         }
 
         .reconnect-indicator.active {
@@ -391,7 +530,7 @@
         }
 
         .reconnect-spinner {
-            border: 3px solid rgba(255, 149, 0, 0.3);
+            border: 3px solid rgba(255, 149, 0, 0.25);
             border-top: 3px solid #ff9500;
             border-radius: 50%;
             width: 40px;
@@ -482,42 +621,55 @@
             100% { transform: translate(960px, 30px); }
         }
 
+        /* --- Shared Panel Look (Leaderboard / Fan / Channel) --- */
+        .fan-leaderboard,
+        .team-leaderboard,
+        .channel-widget {
+            background: rgba(11, 11, 15, 0.68);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+        }
+
         /* --- Fan Leaderboard Panel --- */
         .fan-leaderboard {
             position: fixed;
             top: calc(8vh + 28px);
             right: 20px;
-            width: 230px;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            padding: 12px 14px;
+            width: 232px;
+            padding: 14px 15px 16px;
             box-sizing: border-box;
             z-index: 50;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.08);
         }
 
         .fan-leaderboard-title {
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #00ffcc;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
-            text-align: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+            letter-spacing: 2.5px;
+            color: #f2f2f0;
+            text-align: left;
+            margin-bottom: 11px;
+            padding-bottom: 9px;
+            padding-left: 9px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid #D9A441;
         }
 
         .fan-row {
             display: flex;
             align-items: center;
             gap: 9px;
-            padding: 5px 0;
+            padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.04);
+            animation: row-in 0.35s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes row-in {
+            from { opacity: 0.35; transform: translateY(3px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .fan-row:last-child {
@@ -525,25 +677,48 @@
         }
 
         .fan-rank-badge {
-            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
             font-weight: 700;
-            color: #555;
-            min-width: 16px;
-            text-align: center;
+            color: #6a6a72;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
         }
 
-        .fan-rank-badge.gold   { color: #ffd700; text-shadow: 0 0 6px #ffd700; }
-        .fan-rank-badge.silver { color: #c0c0c0; text-shadow: 0 0 6px #c0c0c0; }
-        .fan-rank-badge.bronze { color: #cd7f32; text-shadow: 0 0 6px #cd7f32; }
+        .fan-rank-badge.gold   {
+            color: #1a1305;
+            background: linear-gradient(135deg, #F4C542, #D9A441);
+            border-color: transparent;
+            box-shadow: 0 0 8px rgba(244, 197, 66, 0.5);
+        }
+        .fan-rank-badge.silver {
+            color: #16171a;
+            background: linear-gradient(135deg, #e4e6ea, #b9bcc2);
+            border-color: transparent;
+            box-shadow: 0 0 8px rgba(198, 201, 206, 0.4);
+        }
+        .fan-rank-badge.bronze {
+            color: #1a0f04;
+            background: linear-gradient(135deg, #cd7f32, #a3652c);
+            border-color: transparent;
+            box-shadow: 0 0 8px rgba(205, 127, 50, 0.4);
+        }
 
         .fan-pfp {
             width: 30px;
             height: 30px;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.18);
             flex-shrink: 0;
-            background: #222;
+            background: #1a1a1e;
         }
 
         /* --- Admin Panel Tabs --- */
@@ -551,7 +726,7 @@
             display: flex;
             gap: 0;
             margin-bottom: 16px;
-            border-bottom: 2px solid rgba(0, 255, 204, 0.2);
+            border-bottom: 2px solid rgba(225, 6, 0, 0.25);
         }
 
         .admin-tab {
@@ -562,7 +737,7 @@
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
-            color: #555;
+            color: #55555c;
             cursor: pointer;
             border-bottom: 2px solid transparent;
             margin-bottom: -2px;
@@ -574,22 +749,22 @@
         }
 
         .admin-tab.active {
-            color: #00ffcc;
-            border-bottom: 2px solid #00ffcc;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+            color: #E10600;
+            border-bottom: 2px solid #E10600;
         }
 
         .fan-pfp-placeholder {
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 1px solid rgba(255,255,255,0.15);
+            background: linear-gradient(135deg, #1c1c22, #101014);
+            border: 1px solid rgba(255,255,255,0.14);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
-            color: #aaa;
+            font-weight: 700;
+            color: #8d8d96;
             flex-shrink: 0;
         }
 
@@ -608,9 +783,11 @@
         }
 
         .fan-count {
-            font-size: 0.72rem;
-            color: #666;
-            margin-top: 1px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            color: #6a6a72;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
         }
 
         /* --- Team Leaderboard Table (Top Left) --- */
@@ -618,29 +795,24 @@
             position: fixed;
             top: calc(8vh + 16px);
             left: 20px;
-            width: 215px;
-            background: rgba(0, 0, 0, 0.50);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            border-radius: 12px;
-            padding: 10px 12px 8px;
+            width: 218px;
+            padding: 12px 13px 9px;
             box-sizing: border-box;
             z-index: 50;
-            box-shadow: 0 0 18px rgba(0, 255, 204, 0.07);
         }
 
         .team-leaderboard-title {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #00ffcc;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
-            text-align: center;
-            margin-bottom: 6px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+            letter-spacing: 2.5px;
+            color: #f2f2f0;
+            text-align: left;
+            margin-bottom: 8px;
+            padding-bottom: 7px;
+            padding-left: 9px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid #E10600;
         }
 
         .team-lb-scroll { overflow: visible; }
@@ -652,6 +824,7 @@
 
         .team-lb-table tr {
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            animation: row-in 0.35s cubic-bezier(0.16,1,0.3,1) both;
         }
 
         .team-lb-table tr:last-child {
@@ -659,23 +832,48 @@
         }
 
         .team-lb-table td {
-            padding: 3px 2px;
+            padding: 4px 2px;
             font-size: 0.74rem;
             vertical-align: middle;
         }
 
         .team-lb-rank {
-            color: #555;
-            font-weight: 700;
-            font-size: 0.68rem;
-            width: 24px;
-            text-align: right;
-            padding-right: 4px;
+            width: 30px;
+            padding-right: 4px !important;
         }
 
-        .team-lb-rank.rank-1 { color: #ffd700; text-shadow: 0 0 5px #ffd700; }
-        .team-lb-rank.rank-2 { color: #c0c0c0; text-shadow: 0 0 5px #c0c0c0; }
-        .team-lb-rank.rank-3 { color: #cd7f32; text-shadow: 0 0 5px #cd7f32; }
+        .rank-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #6a6a72;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 2px 7px 2px 5px;
+            min-width: 24px;
+            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+        }
+
+        .rank-chip.rank-1 {
+            color: #1a1305;
+            background: linear-gradient(90deg, #D9A441, #F4C542);
+            border-color: transparent;
+            box-shadow: 0 0 6px rgba(244, 197, 66, 0.4);
+        }
+        .rank-chip.rank-2 {
+            color: #16171a;
+            background: linear-gradient(90deg, #9a9ca1, #d4d6da);
+            border-color: transparent;
+        }
+        .rank-chip.rank-3 {
+            color: #1a0f04;
+            background: linear-gradient(90deg, #a3652c, #cd7f32);
+            border-color: transparent;
+        }
 
         .team-lb-dot {
             width: 8px;
@@ -687,46 +885,41 @@
         }
 
         .team-lb-name {
-            color: #ccc;
+            color: #d4d4d8;
             font-weight: 700;
-            padding-left: 6px;
+            padding-left: 7px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 118px;
+            max-width: 112px;
         }
 
         .team-lb-count {
-            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            color: #f2f2f0;
             font-weight: 700;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             text-align: right;
-            text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
             min-width: 28px;
         }
 
         .team-lb-empty {
             text-align: center;
-            color: #444;
+            color: #4c4c54;
             font-size: 0.75rem;
             padding: 8px 0;
         }
 
-        /* --- Channel Widget (bottom-left, above team leaderboard) --- */
+        /* --- Channel Widget --- */
         .channel-widget {
             position: fixed;
             top: calc(8vh + 28px + 220px);
             right: 20px;
-            width: 230px;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 10px 12px;
+            width: 232px;
+            padding: 11px 13px;
             box-sizing: border-box;
             z-index: 50;
-            box-shadow: 0 0 18px rgba(255, 0, 0, 0.08);
+            border-color: rgba(225, 6, 0, 0.18) !important;
         }
 
         .channel-widget-inner {
@@ -740,22 +933,22 @@
             height: 38px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid rgba(255, 0, 0, 0.5);
+            border: 2px solid rgba(225, 6, 0, 0.55);
             flex-shrink: 0;
-            background: #1a1a1a;
+            background: #17171a;
         }
 
         .channel-pfp-placeholder {
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1a0000, #330000);
-            border: 2px solid rgba(255, 0, 0, 0.4);
+            background: linear-gradient(135deg, #1c0605, #2c0705);
+            border: 2px solid rgba(225, 6, 0, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1rem;
-            color: #ff5555;
+            color: #ff6b63;
             flex-shrink: 0;
         }
 
@@ -774,22 +967,23 @@
         }
 
         .channel-subs {
-            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
             font-weight: 700;
-            color: #ff4444;
-            text-shadow: 0 0 6px rgba(255, 68, 68, 0.5);
-            margin-top: 2px;
+            color: #ff5b52;
+            margin-top: 3px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
+            letter-spacing: 0.3px;
         }
 
         .channel-subs-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #ff4444;
-            box-shadow: 0 0 4px #ff4444;
+            background: #ff5b52;
+            box-shadow: 0 0 5px #ff5b52;
             display: inline-block;
             animation: pulse-red 2s ease-in-out infinite;
         }
@@ -803,9 +997,9 @@
             font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #555;
-            margin-bottom: 2px;
+            letter-spacing: 1.5px;
+            color: #5c5c64;
+            margin-bottom: 3px;
             display: flex;
             align-items: center;
             gap: 4px;
@@ -814,7 +1008,7 @@
         .channel-yt-badge svg {
             width: 10px;
             height: 10px;
-            fill: #ff0000;
+            fill: #E10600;
             flex-shrink: 0;
         }
 
@@ -831,7 +1025,7 @@
 
     <!-- Fan Leaderboard -->
     <div class="fan-leaderboard" id="fanLeaderboard">
-        <div class="fan-leaderboard-title">🏆 Fan Leaderboard</div>
+        <div class="fan-leaderboard-title">Fan Leaderboard</div>
         <div id="fan-list">
             <div class="fan-row" style="justify-content:center; color:#444; font-size:0.8rem; padding: 10px 0;">Waiting for chat...</div>
         </div>
@@ -839,7 +1033,7 @@
 
     <!-- Team Leaderboard (Top Left) -->
     <div class="team-leaderboard" id="teamLeaderboard">
-        <div class="team-leaderboard-title">📊 Teams</div>
+        <div class="team-leaderboard-title">Teams</div>
         <div class="team-lb-scroll">
             <table class="team-lb-table" id="team-lb-body">
                 <tr><td class="team-lb-empty" colspan="4">Waiting for data...</td></tr>
@@ -960,6 +1154,9 @@
 
         // --- Setup Chart.js ---
         const ctx = document.getElementById('rateChart').getContext('2d');
+        const rateGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        rateGradient.addColorStop(0, 'rgba(225, 6, 0, 0.35)');
+        rateGradient.addColorStop(1, 'rgba(225, 6, 0, 0)');
         const rateChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -967,11 +1164,12 @@
                 datasets: [{
                     label: 'Chat Intensity',
                     data: [],
-                    borderColor: '#00ff00', 
-                    backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                    borderWidth: 2,
+                    borderColor: '#E10600',
+                    backgroundColor: rateGradient,
+                    borderWidth: 2.5,
                     tension: 0.4, 
-                    pointRadius: 0
+                    pointRadius: 0,
+                    fill: true
                 }]
             },
             options: {
@@ -981,8 +1179,8 @@
                     x: { display: false },
                     y: { 
                         display: true,
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        ticks: { color: '#666' },
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        ticks: { color: '#6a6a72', font: { family: "'Titillium Web', sans-serif" } },
                         beginAtZero: true
                     }
                 },
@@ -1251,7 +1449,12 @@
                     
                     label.innerText = team.name;
                     count.innerText = team.count;
-                    rank.innerText = team.rank !== "-" ? "#" + team.rank : "";
+                    rank.innerText = team.rank !== "-" ? "P" + team.rank : "";
+
+                    rank.classList.remove('gold', 'silver', 'bronze');
+                    if (team.rank === 1) rank.classList.add('gold');
+                    else if (team.rank === 2) rank.classList.add('silver');
+                    else if (team.rank === 3) rank.classList.add('bronze');
                 });
 
                 const teamLbBody = document.getElementById('team-lb-body');
@@ -1262,7 +1465,7 @@
                     teamLbBody.innerHTML = allTeams.map(t => {
                         const rankClass = t.rank === 1 ? 'rank-1' : t.rank === 2 ? 'rank-2' : t.rank === 3 ? 'rank-3' : '';
                         return `<tr>
-                            <td class="team-lb-rank ${rankClass}">#${t.rank}</td>
+                            <td class="team-lb-rank"><span class="rank-chip ${rankClass}">P${t.rank}</span></td>
                             <td><span class="team-lb-dot" style="background:${t.color}; color:${t.color};"></span></td>
                             <td class="team-lb-name">${t.name}</td>
                             <td class="team-lb-count">${t.count.toLocaleString()}</td>
@@ -1351,7 +1554,7 @@
                         previewEl.innerHTML = '<span style="color:#444;">No chatters yet</span>';
                     } else {
                         previewEl.innerHTML = chatters.map((c, i) =>
-                            '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span>' + (i+1) + '. ' + c.name + '</span><span style="color:#00ffcc;">' + c.count + '</span></div>'
+                            '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span>' + (i+1) + '. ' + c.name + '</span><span style="color:#D9A441;">' + c.count + '</span></div>'
                         ).join('');
                     }
                 }
