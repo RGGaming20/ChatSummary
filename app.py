@@ -17,6 +17,9 @@ app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key-123")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")  # Set in Render environment variables
 
+# Channel handle to display in the overlay
+CHANNEL_HANDLE = os.environ.get("CHANNEL_HANDLE", "Rohan_Gonte")  # without @
+
 # --- TEAM CONFIGURATION ---
 TEAMS = {
     "Team SouL":       {"keywords": ["Nakul","nakul","Goblin","goblin","LEGIT","legit","Joker","joker","Thunder","thunder","SOUL","soul","🚀",":rocket:"], "color":"#00fe00","count":0},
@@ -58,6 +61,15 @@ should_stop       = False
 reconnect_attempts = 0
 _bg_thread        = None
 
+# ── Channel info cache ────────────────────────────────────────────────────────
+_channel_cache = {
+    "name": None,
+    "pfp": None,
+    "subscribers": None,
+    "fetched_at": 0,
+}
+CHANNEL_CACHE_TTL = 300  # refresh every 5 minutes
+
 
 # ── YouTube API helpers ───────────────────────────────────────────────────────
 
@@ -83,6 +95,45 @@ def get_stream_title(vid_id):
     except Exception:
         pass
     stream_title = f"Video: {vid_id}"
+
+
+def fetch_channel_info():
+    """Fetch channel name, PFP, and subscriber count via YouTube Data API."""
+    global _channel_cache
+    now = time.time()
+
+    # Return cached value if fresh
+    if _channel_cache["name"] and (now - _channel_cache["fetched_at"]) < CHANNEL_CACHE_TTL:
+        return _channel_cache
+
+    if not YOUTUBE_API_KEY:
+        return _channel_cache
+
+    try:
+        # Search by handle to get channel ID first
+        search_url = "https://www.googleapis.com/youtube/v3/channels"
+        params = {
+            "part": "snippet,statistics",
+            "forHandle": CHANNEL_HANDLE,
+            "key": YOUTUBE_API_KEY,
+        }
+        resp = requests.get(search_url, params=params, timeout=8)
+        data = resp.json()
+
+        items = data.get("items", [])
+        if items:
+            snippet = items[0].get("snippet", {})
+            stats   = items[0].get("statistics", {})
+            _channel_cache = {
+                "name":        snippet.get("title", CHANNEL_HANDLE),
+                "pfp":         snippet.get("thumbnails", {}).get("default", {}).get("url", ""),
+                "subscribers": int(stats.get("subscriberCount", 0)),
+                "fetched_at":  now,
+            }
+    except Exception as e:
+        print(f"[Channel] Error fetching channel info: {e}")
+
+    return _channel_cache
 
 
 def get_live_chat_id(vid_id):
@@ -392,6 +443,46 @@ def get_data():
         "stream_title":      stream_title,
         "reconnect_attempts": reconnect_attempts,
         "top_chatters":      [{"name": n, "count": d["count"], "pfp": d["pfp"]} for n, d in top_chatters],
+    })
+
+
+@app.route("/channel_info")
+def channel_info():
+    """Return cached channel info (name, PFP, subscriber count)."""
+    info = fetch_channel_info()
+    return jsonify({
+        "name":        info.get("name") or CHANNEL_HANDLE,
+        "pfp":         info.get("pfp") or "",
+        "subscribers": info.get("subscribers") or 0,
+    })
+
+
+@app.route("/export_snapshot")
+def export_snapshot():
+    """
+    Return a point-in-time snapshot of all team votes and fan leaderboard,
+    useful for manually re-entering data after a crash.
+    """
+    snapshot_time = time.strftime("%Y-%m-%d %H:%M:%S IST", time.localtime())
+
+    sorted_teams = sorted(TEAMS.items(), key=lambda x: x[1]["count"], reverse=True)
+    teams_snapshot = [
+        {"rank": i + 1, "name": n, "count": d["count"], "color": d["color"]}
+        for i, (n, d) in enumerate(sorted_teams)
+    ]
+
+    sorted_fans = sorted(chatter_counts.items(), key=lambda x: x[1]["count"], reverse=True)
+    fans_snapshot = [
+        {"rank": i + 1, "name": n, "count": d["count"], "pfp": d["pfp"]}
+        for i, (n, d) in enumerate(sorted_fans)
+    ]
+
+    return jsonify({
+        "snapshot_time": snapshot_time,
+        "stream_title":  stream_title,
+        "total_messages": total_messages,
+        "teams": teams_snapshot,
+        "fans":  fans_snapshot,
     })
 
 
