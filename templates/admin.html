@@ -26,7 +26,7 @@
             border-radius: 16px;
             padding: 40px;
             width: 100%;
-            max-width: 520px;
+            max-width: 560px;
             backdrop-filter: blur(10px);
         }
 
@@ -129,6 +129,45 @@
             margin-top: 10px;
         }
 
+        .btn-export {
+            background: rgba(0,200,255,0.15);
+            color: #00c8ff;
+            border: 1px solid rgba(0,200,255,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-export:hover {
+            background: rgba(0,200,255,0.28);
+            box-shadow: 0 0 12px rgba(0,200,255,0.4);
+        }
+
+        .btn-copy {
+            background: rgba(160,100,255,0.15);
+            color: #a064ff;
+            border: 1px solid rgba(160,100,255,0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: rgba(160,100,255,0.28);
+        }
+
         .alert {
             padding: 12px 16px;
             border-radius: 8px;
@@ -215,6 +254,154 @@
         }
 
         .view-link:hover { color: #00ffcc; }
+
+        /* --- Export Snapshot Section --- */
+        .export-section {
+            background: rgba(0,200,255,0.04);
+            border: 1px solid rgba(0,200,255,0.15);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .export-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00c8ff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-meta {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 12px;
+        }
+
+        .snapshot-table-wrap {
+            max-height: 260px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .snapshot-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .snapshot-table thead th {
+            background: rgba(0,200,255,0.1);
+            color: #00c8ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.7rem;
+            padding: 7px 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+
+        .snapshot-table tbody tr {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+
+        .snapshot-table tbody tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .snapshot-table tbody td {
+            padding: 6px 10px;
+            color: #ccc;
+            vertical-align: middle;
+        }
+
+        .snapshot-table .rank-col {
+            color: #555;
+            font-size: 0.72rem;
+            width: 30px;
+        }
+
+        .snapshot-table .rank-col.r1 { color: #ffd700; }
+        .snapshot-table .rank-col.r2 { color: #c0c0c0; }
+        .snapshot-table .rank-col.r3 { color: #cd7f32; }
+
+        .color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+            box-shadow: 0 0 4px currentColor;
+        }
+
+        .count-col {
+            color: #00ffcc;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .snapshot-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .snap-tab {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s;
+        }
+
+        .snap-tab.active {
+            color: #00c8ff;
+            border-bottom: 2px solid #00c8ff;
+        }
+
+        .snap-tab:hover { color: #aaa; }
+
+        .snapshot-copy-area {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: #aaa;
+            max-height: 120px;
+            overflow-y: auto;
+            white-space: pre;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 10px;
+        }
+
+        .snap-copy-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #snapshotStatus {
+            font-size: 0.82rem;
+            color: #00ff96;
+            min-height: 18px;
+        }
     </style>
 </head>
 <body>
@@ -278,6 +465,52 @@
 
     <hr class="divider">
 
+    <!-- Export Snapshot -->
+    <label>📸 Export Snapshot</label>
+    <div class="export-section">
+        <div class="export-section-title">💾 Data Backup — use before crash or reset</div>
+        <div class="export-meta" id="snap-meta">Snapshot not loaded yet. Click Export to load.</div>
+
+        <div style="margin-bottom:12px;">
+            <button class="btn-export" onclick="loadSnapshot()">📥 Export Current Snapshot</button>
+        </div>
+
+        <div id="snap-content" style="display:none;">
+            <div class="snapshot-tabs">
+                <div class="snap-tab active" onclick="switchSnapTab('teams')" id="snap-tab-teams">🏆 Teams</div>
+                <div class="snap-tab" onclick="switchSnapTab('fans')" id="snap-tab-fans">👥 Fans</div>
+                <div class="snap-tab" onclick="switchSnapTab('raw')" id="snap-tab-raw">📋 Raw Text</div>
+            </div>
+
+            <div id="snap-teams">
+                <div class="snapshot-table-wrap">
+                    <table class="snapshot-table">
+                        <thead><tr><th>#</th><th>Team</th><th style="text-align:right;">Votes</th></tr></thead>
+                        <tbody id="snap-teams-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="snap-fans" style="display:none;">
+                <div class="snapshot-table-wrap">
+                    <table class="snapshot-table">
+                        <thead><tr><th>#</th><th>Username</th><th style="text-align:right;">Messages</th></tr></thead>
+                        <tbody id="snap-fans-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="snap-raw" style="display:none;">
+                <div class="snapshot-copy-area" id="snap-raw-text" style="display:block;"></div>
+            </div>
+
+            <div class="snap-copy-row">
+                <button class="btn-copy" onclick="copySnapshot()">📋 Copy as Text</button>
+                <span id="snapshotStatus"></span>
+            </div>
+        </div>
+    </div>
+
     <hr class="divider">
 
     <!-- Inject Votes -->
@@ -293,10 +526,10 @@
     <!-- Inject Fan -->
     <label>🏆 Inject Fan Count</label>
     <div style="display:flex; gap:10px; margin-bottom:8px;">
-        <input type="text" id="fan-name" placeholder="Username" style="flex:2;">
-        <input type="number" id="fan-count" placeholder="Count" value="0" style="flex:1;">
+        <input type="text" id="fan-name" placeholder="Username" style="flex:2; margin-bottom:0;">
+        <input type="number" id="fan-count" placeholder="Count" value="0" style="flex:1; margin-bottom:0;">
     </div>
-    <button class="btn btn-primary" onclick="injectFan()">💉 Inject Fan</button>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="injectFan()">💉 Inject Fan</button>
     <div id="fanStatus" style="margin-top:8px; font-size:0.9rem; color:#00ffcc; min-height:20px;"></div>
 
     <hr class="divider">
@@ -327,7 +560,111 @@
     <a href="/" class="view-link">👁️ View Public Dashboard →</a>
 
     <script>
-    // Load teams and build inject form
+    // ── Snapshot ──────────────────────────────────────────────────────────────
+    let _snapData = null;
+
+    async function loadSnapshot() {
+        try {
+            const res = await fetch('/export_snapshot');
+            _snapData = await res.json();
+
+            document.getElementById('snap-meta').textContent =
+                `Captured: ${_snapData.snapshot_time} · ${_snapData.total_messages.toLocaleString()} total messages`;
+
+            // Teams table
+            const teamBody = document.getElementById('snap-teams-body');
+            teamBody.innerHTML = (_snapData.teams || []).map(t => {
+                const rc = t.rank === 1 ? 'r1' : t.rank === 2 ? 'r2' : t.rank === 3 ? 'r3' : '';
+                return `<tr>
+                    <td class="rank-col ${rc}">#${t.rank}</td>
+                    <td><span class="color-dot" style="background:${t.color}; color:${t.color};"></span>${t.name}</td>
+                    <td class="count-col">${t.count.toLocaleString()}</td>
+                </tr>`;
+            }).join('');
+
+            // Fans table
+            const fanBody = document.getElementById('snap-fans-body');
+            if ((_snapData.fans || []).length === 0) {
+                fanBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#444;padding:12px;">No fan data yet</td></tr>';
+            } else {
+                fanBody.innerHTML = _snapData.fans.map(f => {
+                    const rc = f.rank === 1 ? 'r1' : f.rank === 2 ? 'r2' : f.rank === 3 ? 'r3' : '';
+                    return `<tr>
+                        <td class="rank-col ${rc}">#${f.rank}</td>
+                        <td>${f.name}</td>
+                        <td class="count-col">${f.count.toLocaleString()}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Raw text
+            buildRawText();
+
+            document.getElementById('snap-content').style.display = 'block';
+            switchSnapTab('teams');
+        } catch(e) {
+            document.getElementById('snap-meta').textContent = '❌ Failed to load: ' + e.message;
+        }
+    }
+
+    function buildRawText() {
+        if (!_snapData) return '';
+        let lines = [];
+        lines.push(`=== STREAM SNAPSHOT ===`);
+        lines.push(`Captured : ${_snapData.snapshot_time}`);
+        lines.push(`Stream   : ${_snapData.stream_title}`);
+        lines.push(`Messages : ${_snapData.total_messages.toLocaleString()}`);
+        lines.push('');
+        lines.push('--- TEAM VOTES ---');
+        lines.push(`#    ${'Team'.padEnd(22)} Votes`);
+        lines.push('-'.repeat(36));
+        (_snapData.teams || []).forEach(t => {
+            lines.push(`#${String(t.rank).padEnd(4)} ${t.name.padEnd(22)} ${t.count.toLocaleString()}`);
+        });
+        lines.push('');
+        lines.push('--- FAN LEADERBOARD ---');
+        if ((_snapData.fans || []).length === 0) {
+            lines.push('(no data)');
+        } else {
+            lines.push(`#    ${'Username'.padEnd(22)} Msgs`);
+            lines.push('-'.repeat(36));
+            _snapData.fans.slice(0, 50).forEach(f => {
+                lines.push(`#${String(f.rank).padEnd(4)} ${f.name.padEnd(22)} ${f.count.toLocaleString()}`);
+            });
+        }
+        const raw = lines.join('\n');
+        document.getElementById('snap-raw-text').textContent = raw;
+        return raw;
+    }
+
+    function switchSnapTab(tab) {
+        ['teams','fans','raw'].forEach(t => {
+            document.getElementById('snap-' + t).style.display = t === tab ? 'block' : 'none';
+            document.getElementById('snap-tab-' + t).classList.toggle('active', t === tab);
+        });
+    }
+
+    async function copySnapshot() {
+        const raw = buildRawText();
+        try {
+            await navigator.clipboard.writeText(raw);
+            const el = document.getElementById('snapshotStatus');
+            el.textContent = '✅ Copied to clipboard!';
+            setTimeout(() => { el.textContent = ''; }, 3000);
+        } catch(e) {
+            // Fallback: select the raw textarea
+            const area = document.getElementById('snap-raw-text');
+            area.style.display = 'block';
+            switchSnapTab('raw');
+            const range = document.createRange();
+            range.selectNode(area);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.getElementById('snapshotStatus').textContent = '⬆ Select all text above and copy';
+        }
+    }
+
+    // ── Load teams for inject ─────────────────────────────────────────────────
     async function loadTeams() {
         try {
             const res = await fetch('/get_teams');
@@ -338,9 +675,9 @@
                 const id = 'inject-' + name.replace(/\s+/g, '-');
                 container.innerHTML += `
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <label style="flex:1; font-size:0.85rem; color:rgba(255,255,255,0.7);">${name} <span style="color:#555;">(${count})</span></label>
+                        <label style="flex:1; font-size:0.85rem; color:rgba(255,255,255,0.7); margin-bottom:0;">${name} <span style="color:#555;">(${count})</span></label>
                         <input type="number" id="${id}" value="0" placeholder="0"
-                               style="width:70px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:4px 8px; color:#fff; font-family:inherit;">
+                               style="width:70px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:4px 8px; color:#fff; font-family:inherit; margin-bottom:0;">
                     </div>`;
             }
         } catch(e) { console.error(e); }
